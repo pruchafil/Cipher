@@ -1,15 +1,14 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace Cipher
 {
-    class VigenereCipher
+    internal class VigenereCipher : ICipher
     {
-        private const char MinUpper     = (char) 65;
-        private const char MinLower     = (char) 97;
-        private const char Displacement = (char) 25;
-
-        private string _str;
+        private const char MinUpper = (char)65;
+        private const char MinLower = (char)97;
+        private const char Displacement = (char)25;
         private readonly string _key;
 
         private string Key
@@ -17,26 +16,22 @@ namespace Cipher
             get { return _key; }
             init
             {
-                if (value.Any(x => !char.IsUpper(x)))
-                    throw new System.ArgumentException("Key can only hold lowercase letters");
+                if (value.Any(x => !char.IsLower(x)))
+                    throw new ArgumentException("Key can only hold lowercase letters");
 
                 _key = value;
             }
         }
 
-        public string Current
-        {
-            get { return _str; }
-            private set { _str = value; }
-        }
+        public string Current { get; private set; }
 
         public VigenereCipher(string str, string key)
         {
-            this._str = str;
-            this._key = key;
+            Current = str;
+            Key = key;
 
-            while (str.Length < _key.Length)
-                _key += key;
+            while (Current.Length > Key.Length)
+                Key += key;
         }
 
         public void Encrypt()
@@ -45,30 +40,26 @@ namespace Cipher
 
             for (int i = 0; i < Current.Length; ++i)
             {
-                char kc = _key[i];
+                char kc = Key[i];
                 char c = Current[i];
 
                 if (c == ' ')
                     continue;
 
-                bool kupper = char.IsUpper(kc);
-                bool klower = char.IsLower(kc);
-                bool kalp   = char.IsLetter(kc);
-                bool upper  = char.IsUpper(c);
-                bool lower  = char.IsLower(c);
-                bool alp    = char.IsLetter(c);
+                bool upper = char.IsUpper(c);
+                bool lower = char.IsLower(c);
 
-                c += kc;
+                c += (char)(kc - MinLower);
 
                 if (upper)
                 {
                     if (c > MinUpper + Displacement)
-                        c -= Displacement;
+                        c -= (char)(Displacement + 1);
                 }
                 else if (lower)
                 {
                     if (c > MinLower + Displacement)
-                        c -= Displacement;
+                        c -= (char)(Displacement + 1);
                 }
 
                 sb.Append(c);
@@ -79,7 +70,36 @@ namespace Cipher
 
         public void Decrypt()
         {
-            Current = new System.String(_str.Select(x =>  (System.Char)( x - _advance )).ToArray());
+            StringBuilder sb = new();
+
+            for (int i = 0; i < Current.Length; ++i)
+            {
+                char kc = Key[i];
+                char c = Current[i];
+
+                if (c == ' ')
+                    continue;
+
+                bool upper = char.IsUpper(c);
+                bool lower = char.IsLower(c);
+
+                c -= (char)(kc - MinLower);
+
+                if (upper)
+                {
+                    if (c < MinUpper)
+                        c += (char)(Displacement + 1);
+                }
+                else if (lower)
+                {
+                    if (c < MinLower)
+                        c += (char)(Displacement + 1);
+                }
+
+                sb.Append(c);
+            }
+
+            Current = sb.ToString();
         }
     }
 }

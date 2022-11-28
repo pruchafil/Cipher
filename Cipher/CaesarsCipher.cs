@@ -3,20 +3,14 @@ using System.Text;
 
 namespace Cipher
 {
-    class CaesarsCipher
+    internal class CaesarsCipher : ICipher
     {
-        private const char MinUpper     = (char) 65;
-        private const char MinLower     = (char) 97;
-        private const char Displacement = (char) 25;
-
-        private string _str;
+        private const char MinUpper = (char)65;
+        private const char MinLower = (char)97;
+        private const char Displacement = (char)25;
         private readonly int _advance;
 
-        public string Current
-        {
-            get { return _str; }
-            private set { _str = value; }
-        }
+        public string Current { get; private set; }
 
         public int Advance
         {
@@ -32,7 +26,7 @@ namespace Cipher
 
         public CaesarsCipher(string str, int advance)
         {
-            this._str = str;
+            this.Current = str;
             this._advance = advance;
         }
 
@@ -73,7 +67,7 @@ namespace Cipher
                     }
                 }
 
-                sb.Append( (char) i );
+                sb.Append((char)i);
             }
 
             Current = sb.ToString();
@@ -81,7 +75,7 @@ namespace Cipher
 
         public void Decrypt()
         {
-            Current = new System.String(_str.Select(x =>  (System.Char)( x - _advance )).ToArray());
+            Current = new System.String(Current.Select(x => (System.Char)(x - _advance)).ToArray());
         }
     }
 }

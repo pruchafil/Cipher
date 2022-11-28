@@ -2,25 +2,60 @@
 
 namespace Cipher
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            CaesarsCipher cc = new("Toto je nejaka tajna zprava", 2);
+            ICipher ciph;
 
-            cc.Encrypt();
-            Console.WriteLine(cc.Current);
-            cc.Decrypt();
-            Console.WriteLine(cc.Current);
-            Console.ReadKey();
+            while (true)
+            {
+                Console.WriteLine("Caesar (C) / Vigenère (V) / END");
+                ConsoleKeyInfo cki = Console.ReadKey();
+                Console.WriteLine();
 
-            //for (int i = char.MinValue; i < 500; i++)
-            //{
-            //    Console.WriteLine("{0}: {1}", i, (char)i);
-            //}
+                if (cki.Key == ConsoleKey.C)
+                {
+                    Console.Write("Insert phrase: ");
+                    string str = Console.ReadLine();
+                    int val = 0;
 
-            // upper = 65 - 90
-            // lower = 97 - 122
+                    {
+                        string s;
+
+                        do
+                        {
+                            Console.Write("Inset valid number: ");
+                            s = Console.ReadLine();
+                        }
+                        while (!int.TryParse(s, out val));
+                    }
+
+                    ciph = new CaesarsCipher(str, val);
+                    ciph.Encrypt();
+                    Console.WriteLine(ciph.Current);
+                }
+                else if (cki.Key == ConsoleKey.V)
+                {
+                    Console.Write("Insert phrase: ");
+                    string str = Console.ReadLine();
+                    Console.Write("Inset key (lowercase): ");
+                    string s = Console.ReadLine();
+
+                    try
+                    {
+                        ciph = new VigenereCipher(str, s);
+                        ciph.Encrypt();
+                        Console.WriteLine(ciph.Current);
+                    }
+                    catch (ArgumentException ex) { Console.WriteLine(ex.Message); }
+                }
+                else
+                {
+                    Console.WriteLine("Quitting");
+                    break;
+                }
+            }
         }
     }
 }
